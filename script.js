@@ -3,6 +3,8 @@ const ctx = canvas.getContext('2d');
 let bgImage = new Image();
 let points = [];
 let shapes = [];
+let moveDotsMode = false;
+let draggingPointIndex = null;
 
 document.getElementById('bgUpload').addEventListener('change', function (e) {
   const file = e.target.files[0];
@@ -130,3 +132,37 @@ function addRandomShape() {
 
   draw();
 }
+
+function toggleMoveDotsMode() {
+  moveDotsMode = !moveDotsMode;
+  document.getElementById('moveDotsBtn').classList.toggle('active', moveDotsMode);
+  if (!moveDotsMode) draggingPointIndex = null;
+}
+
+canvas.addEventListener('mousedown', function (e) {
+  if (!moveDotsMode) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  for (let i = 0; i < points.length; i++) {
+    const p = points[i];
+    if (Math.hypot(p.x - x, p.y - y) < 8) {
+      draggingPointIndex = i;
+      break;
+    }
+  }
+});
+
+canvas.addEventListener('mousemove', function (e) {
+  if (!moveDotsMode || draggingPointIndex === null) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  points[draggingPointIndex] = { x, y };
+  draw();
+});
+
+canvas.addEventListener('mouseup', function () {
+  if (!moveDotsMode) return;
+  draggingPointIndex = null;
+});

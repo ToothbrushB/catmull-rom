@@ -42,6 +42,11 @@ body {
     background-color: #ffa07a;
 }
 
+#controls button.active {
+    background-color: #2e8b57;
+    color: #fff;
+}
+
 #controls label {
     color: #333;
 }
