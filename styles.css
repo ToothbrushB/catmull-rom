@@ -1,0 +1,75 @@
+:root {
+    color-scheme: light dark;
+}
+
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    background: linear-gradient(to right, light-dark(#f0f8ff, #212121), light-dark(#ffe4e1, #054369));
+}
+
+#left-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1em;
+    background: #ffffffcc;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+#controls {
+    margin: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+#controls button,
+#controls input[type="file"] {
+    background-color: #ffb347;
+    color: #fff;
+    border: none;
+    padding: 0.5em 1em;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#controls button:hover {
+    background-color: #ffa07a;
+}
+
+#controls label {
+    color: #333;
+}
+
+#canvas-container {
+    position: relative;
+    border: 2px solid #87cefa;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+canvas {
+    cursor: crosshair;
+}
+
+#description {
+    width: 300px;
+    padding: 1em;
+    border-left: 1px solid #ddd;
+    background: #fafad2;
+    color: #333;
+    line-height: 1.5em;
+}
+
+#description h3 {
+    color: #b22222;
+}
+
+#description ul li::marker {
+    color: #ff69b4;
+}

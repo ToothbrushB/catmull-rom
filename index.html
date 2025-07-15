@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Catmull-Rom Spline Path Editor</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="left-panel">
+    <h2 style="color:#2e8b57">Catmull-Rom Spline Path Editor</h2>
+    <div id="controls">
+      <input type="file" id="bgUpload" accept="image/*">
+      <label>Scale (px/unit): <input type="number" id="scaleInput" value="1"></label>
+      <button onclick="clearPoints()">Clear Points</button>
+      <button onclick="exportPathCSV()">Export Path as CSV</button>
+      <button onclick="addRandomShape()">Add Random Shape</button>
+      <button onclick="undobutton()">Undo Last Dot</button>
+    </div>
+    <div id="canvas-container">
+      <canvas id="canvas" width="800" height="600"></canvas>
+    </div>
+  </div>
+
+  <div id="description">
+    <h3>About This App</h3>
+    <p>This web application allows users to upload a background image, such as a floor plan, and define a smooth path using Catmull-Rom splines by clicking to add control points on the canvas. It is particularly useful for robotics and path planning scenarios where smooth motion along a predefined track is needed.</p>
+    <p>Features include:</p>
+    <ul>
+      <li>Upload a background image (e.g., a map or room layout).</li>
+      <li>Click to add path points — a Catmull-Rom spline connects them smoothly.</li>
+      <li>Set the scale (pixels per unit) for real-world integration.</li>
+      <li>Export the generated path as a CSV file.</li>
+      <li>Add random shapes for testing or decoration.</li>
+    </ul>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
