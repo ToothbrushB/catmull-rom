@@ -5,6 +5,23 @@ let points = [];
 let shapes = [];
 let moveDotsMode = false;
 let draggingPointIndex = null;
+let snapToGrid = false;
+let gridSize = 20; // Grid spacing in pixels
+let robotSimulation = false;
+let robotPosition = { x: 0, y: 0 };
+let robotProgress = 0;
+let robotAnimationId = null;
+let robotSpeed = 0.005; // How fast the robot moves along the path
+
+nucanvas.addEventListener('mousemove', function (e) {
+  if (!moveDotsMode || draggingPointIndex === null) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const snappedPoint = snapToGridPoint(x, y);
+  points[draggingPointIndex] = snappedPoint;
+  draw();
+});
 
 document.getElementById('bgUpload').addEventListener('change', function (e) {
   const file = e.target.files[0];
@@ -18,10 +35,12 @@ document.getElementById('bgUpload').addEventListener('change', function (e) {
 });
 
 canvas.addEventListener('click', function (e) {
+  if (moveDotsMode) return; // Don't add points in move mode
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
-  points.push({ x, y });
+  const snappedPoint = snapToGridPoint(x, y);
+  points.push(snappedPoint);
   draw();
 });
 
@@ -39,6 +58,8 @@ function undobutton() {
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (bgImage.src) ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+
+  drawGrid();
 
   for (const shape of shapes) {
     ctx.fillStyle = shape.color;
@@ -83,6 +104,11 @@ function draw() {
     }
     ctx.stroke();
   }
+  
+  // Draw robot if simulation is active
+  drawRobot();
+
+  drawRobot();
 }
 
 function catmullRom(p0, p1, p2, p3, t) {
@@ -139,6 +165,46 @@ function toggleMoveDotsMode() {
   if (!moveDotsMode) draggingPointIndex = null;
 }
 
+function toggleSnapToGrid() {
+  snapToGrid = !snapToGrid;
+  document.getElementById('snapToGridBtn').classList.toggle('active', snapToGrid);
+  draw();
+}
+
+function snapToGridPoint(x, y) {
+  if (!snapToGrid) return { x, y };
+  return {
+    x: Math.round(x / gridSize) * gridSize,
+    y: Math.round(y / gridSize) * gridSize
+  };
+}
+
+function drawGrid() {
+  if (!snapToGrid) return;
+
+  ctx.strokeStyle = '#e0e0e0';
+  ctx.lineWidth = 0.5;
+  ctx.setLineDash([2, 2]);
+
+  // Vertical lines
+  for (let x = 0; x <= canvas.width; x += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    ctx.stroke();
+  }
+
+  // Horizontal lines
+  for (let y = 0; y <= canvas.height; y += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+
+  ctx.setLineDash([]);
+}
+
 canvas.addEventListener('mousedown', function (e) {
   if (!moveDotsMode) return;
   const rect = canvas.getBoundingClientRect();
@@ -158,7 +224,7 @@ canvas.addEventListener('mousemove', function (e) {
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
-  points[draggingPointIndex] = { x, y };
+  points[draggingPointIndex] = snapToGridPoint(x, y);
   draw();
 });
 
@@ -166,3 +232,86 @@ canvas.addEventListener('mouseup', function () {
   if (!moveDotsMode) return;
   draggingPointIndex = null;
 });
+
+function toggleRobotSimulation() {
+  robotSimulation = !robotSimulation;
+  const btn = document.getElementById('startRobotBtn');
+  
+  if (robotSimulation) {
+    if (points.length < 4) {
+      alert('Need at least 4 points to simulate robot path!');
+      robotSimulation = false;
+      return;
+    }
+    btn.textContent = 'Stop Robot';
+    btn.classList.add('active');
+    robotProgress = 0;
+    startRobotAnimation();
+  } else {
+    btn.textContent = 'Start Robot';
+    btn.classList.remove('active');
+    stopRobotAnimation();
+  }
+}
+
+function startRobotAnimation() {
+  function animate() {
+    if (!robotSimulation) return;
+    
+    robotProgress += robotSpeed;
+    
+    // Calculate robot position along the path
+    if (points.length >= 4) {
+      const totalSegments = points.length - 3;
+      const currentSegment = Math.floor(robotProgress * totalSegments);
+      const localT = (robotProgress * totalSegments) - currentSegment;
+      
+      if (currentSegment >= totalSegments) {
+        // Robot reached the end, restart
+        robotProgress = 0;
+      } else {
+        const segmentIndex = currentSegment + 1; // Offset for Catmull-Rom
+        const p0 = points[segmentIndex - 1];
+        const p1 = points[segmentIndex];
+        const p2 = points[segmentIndex + 1];
+        const p3 = points[segmentIndex + 2];
+        
+        robotPosition.x = catmullRom(p0.x, p1.x, p2.x, p3.x, localT);
+        robotPosition.y = catmullRom(p0.y, p1.y, p2.y, p3.y, localT);
+      }
+    }
+    
+    draw();
+    robotAnimationId = requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+function stopRobotAnimation() {
+  if (robotAnimationId) {
+    cancelAnimationFrame(robotAnimationId);
+    robotAnimationId = null;
+  }
+  draw(); // Redraw without robot
+}
+
+function drawRobot() {
+  if (!robotSimulation || points.length < 4) return;
+  
+  // Draw robot as a blue circle with direction indicator
+  ctx.fillStyle = '#1e90ff';
+  ctx.beginPath();
+  ctx.arc(robotPosition.x, robotPosition.y, 8, 0, 2 * Math.PI);
+  ctx.fill();
+  
+  // Draw robot border
+  ctx.strokeStyle = '#000080';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  
+  // Draw direction indicator (small white dot)
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(robotPosition.x, robotPosition.y, 3, 0, 2 * Math.PI);
+  ctx.fill();
+}
