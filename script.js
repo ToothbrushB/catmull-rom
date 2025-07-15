@@ -305,3 +305,8 @@ function addRandomShape() {
 
   draw();
 }
+
+function updateRobotSpeed(value) {
+  // Convert slider value (1-20) to robot speed (0.001-0.02)
+  robotSpeed = (value / 1000) * 4; // Range from 0.004 to 0.08
+}
