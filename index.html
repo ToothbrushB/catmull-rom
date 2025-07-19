@@ -4,46 +4,105 @@
   <meta charset="UTF-8">
   <title>Catmull-Rom Spline Path Editor</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
 <body>
+    <noscript>
+      <div>
+          <p><strong>Warning:</strong> JavaScript is disabled in your browser. This website will not function correctly without JavaScript enabled.</p>
+          <p>Please use a browser with JavaScript enabled for the best experience.</p>
+      </div>
+  </noscript>
+
   <div id="left-panel">
-    <h2 style="color:#2e8b57">Catmull-Rom Spline Path Editor</h2>
-    <div id="controls">
-      <input type="file" id="bgUpload" accept="image/*">
-      <label>Scale (px/unit): <input type="number" id="scaleInput" value="1"></label>
-      <button onclick="clearPoints()">Clear Points</button>
-      <button onclick="exportPathCSV()">Export Path as CSV</button>
-      <button onclick="addRandomShape()">Add Random Shape</button>
-      <button onclick="undobutton()">Undo Last Dot</button>
-      <button id="moveDotsBtn" onclick="toggleMoveDotsMode()">Move Dots</button>
-      <button id="snapToGridBtn" onclick="toggleSnapToGrid()">Snap to Grid</button>
-      <button id="startRobotBtn" onclick="toggleRobotSimulation()">Start Robot</button>
-      <div id="robot-speed-control">
-        <label for="robotSpeedSlider">Robot Speed:</label>
-        <div class="speed-slider-container">
-          <span class="speed-label">-</span>
-          <input type="range" id="robotSpeedSlider" min="1" max="20" value="5" oninput="updateRobotSpeed(this.value)">
-          <span class="speed-label">+</span>
+    <div id="header">
+      <h2 style="color:#2e8b57">Catmull-Rom Spline Path Editor</h2>
+      <div id="help-icon" class="tooltip">
+        <span class="material-icons">help_outline</span>
+        <div class="tooltip-content">
+          <h4>About This App</h4>
+          <p>Upload a background image and define smooth paths using Catmull-Rom splines by clicking to add control points.</p>
+          <p><strong>Features:</strong></p>
+          <ul>
+            <li>Upload background images (maps, floor plans)</li>
+            <li>Click to add path points with smooth spline connections</li>
+            <li>Set scale for real-world integration</li>
+            <li>Export paths as CSV files</li>
+            <li>Move and snap dots to grid</li>
+            <li>Robot simulation along the path</li>
+          </ul>
         </div>
       </div>
     </div>
-    <div id="canvas-container">
-      <canvas id="canvas" width="800" height="600"></canvas>
+    
+    <div id="main-content">
+      <div id="controls">
+      <div class="control-group">
+        <h4>File & Background</h4>
+        <label class="file-upload-btn">
+          <span class="material-icons">upload_file</span>
+          Upload Background
+          <input type="file" id="bgUpload" accept="image/*" style="display: none;">
+        </label>
+        <label class="scale-input">
+          <span class="material-icons">straighten</span>
+          Scale (px/unit): <input type="number" id="scaleInput" value="1">
+        </label>
+      </div>
+      
+      <div class="control-group">
+        <h4>Path Controls</h4>
+        <button onclick="clearPoints()">
+          <span class="material-icons">clear_all</span>
+          Clear Points
+        </button>
+        <button onclick="undobutton()">
+          <span class="material-icons">undo</span>
+          Undo Last Dot
+        </button>
+        <button onclick="exportPathCSV()">
+          <span class="material-icons">download</span>
+          Export CSV
+        </button>
+      </div>
+      
+      <div class="control-group">
+        <h4>Editing Tools</h4>
+        <button id="moveDotsBtn" onclick="toggleMoveDotsMode()">
+          <span class="material-icons">open_with</span>
+          Move Dots
+        </button>
+        <button id="snapToGridBtn" onclick="toggleSnapToGrid()">
+          <span class="material-icons">grid_on</span>
+          Snap to Grid
+        </button>
+      </div>
+      
+      <div class="control-group">
+        <h4>Robot Simulation</h4>
+        <button id="startRobotBtn" onclick="toggleRobotSimulation()">
+          <span class="material-icons">smart_toy</span>
+          Start Robot
+        </button>
+        <div id="robot-speed-control">
+          <label for="robotSpeedSlider">
+            <span class="material-icons">speed</span>
+            Robot Speed:
+          </label>
+          <div class="speed-slider-container">
+            <span class="speed-label">-</span>
+            <input type="range" id="robotSpeedSlider" min="1" max="20" value="5" oninput="updateRobotSpeed(this.value)">
+            <span class="speed-label">+</span>
+          </div>
+        </div>
+      </div>
+      
+      <div id="canvas-container">
+        <canvas id="canvas" width="800" height="600"></canvas>
+      </div>
     </div>
   </div>
 
-  <div id="description">
-    <h3>About This App</h3>
-    <p>This web application allows users to upload a background image, such as a floor plan, and define a smooth path using Catmull-Rom splines by clicking to add control points on the canvas. It is particularly useful for robotics and path planning scenarios where smooth motion along a predefined track is needed.</p>
-    <p>Features include:</p>
-    <ul>
-      <li>Upload a background image (e.g., a map or room layout).</li>
-      <li>Click to add path points — a Catmull-Rom spline connects them smoothly.</li>
-      <li>Set the scale (pixels per unit) for real-world integration.</li>
-      <li>Export the generated path as a CSV file.</li>
-      <li>Add random shapes for testing or decoration.</li>
-    </ul>
-  </div>
   <script src="script.js"></script>
 </body>
 </html>

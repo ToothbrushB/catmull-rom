@@ -12,6 +12,8 @@ let robotPosition = { x: 0, y: 0 };
 let robotProgress = 0;
 let robotAnimationId = null;
 let robotSpeed = 0.005; // How fast the robot moves along the path
+let scale = 1;
+
 
 function toggleSnapToGrid() {
   snapToGrid = !snapToGrid;
@@ -204,6 +206,27 @@ function undobutton() {
 }
 
 function draw() {
+  // Get the canvas container dimensions
+  const canvasContainer = document.getElementById('canvas-container');
+  const containerWidth = canvasContainer.clientWidth;
+  const containerHeight = canvasContainer.clientHeight;
+  
+  // Scale image to fit within the canvas container if image is larger
+  if (bgImage.src && (bgImage.width > containerWidth || bgImage.height > containerHeight)) {
+    scale = Math.min(containerWidth / bgImage.width, containerHeight / bgImage.height);
+  } else if (bgImage.src) {
+    scale = 1;
+  }
+
+  // Set canvas size based on scaled image or container size
+  if (bgImage.src) {
+    canvas.width = Math.min(bgImage.width * scale, containerWidth);
+    canvas.height = Math.min(bgImage.height * scale, containerHeight);
+  } else {
+    canvas.width = Math.min(800, containerWidth);
+    canvas.height = Math.min(600, containerHeight);
+  }
+  
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (bgImage.src) ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
   
@@ -266,16 +289,8 @@ function exportPathCSV() {
   if (points.length < 4) return;
 
   let csv = 'x,y\n';
-  for (let i = 1; i < points.length - 2; i++) {
-    const p0 = points[i - 1];
-    const p1 = points[i];
-    const p2 = points[i + 1];
-    const p3 = points[i + 2];
-    for (let t = 0; t <= 1; t += 0.02) {
-      const x = catmullRom(p0.x, p1.x, p2.x, p3.x, t);
-      const y = catmullRom(p0.y, p1.y, p2.y, p3.y, t);
-      csv += `${x.toFixed(2)},${y.toFixed(2)}\n`;
-    }
+  for (let i = 0; i < points.length; i++) {
+    csv += `${points[i].x / scale},${points[i].y / scale}\n`;
   }
 
   const blob = new Blob([csv], { type: 'text/csv' });
@@ -288,25 +303,15 @@ function exportPathCSV() {
   document.body.removeChild(a);
 }
 
-function addRandomShape() {
-  const shapeTypes = ['circle', 'rect', 'triangle'];
-  const type = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
-  const x = Math.random() * canvas.width;
-  const y = Math.random() * canvas.height;
-  const color = `hsl(${Math.random() * 360}, 70%, 60%)`;
-
-  if (type === 'circle') {
-    shapes.push({ type, x, y, r: 10 + Math.random() * 30, color });
-  } else if (type === 'rect') {
-    shapes.push({ type, x, y, w: 20 + Math.random() * 40, h: 20 + Math.random() * 40, color });
-  } else if (type === 'triangle') {
-    shapes.push({ type, x, y, size: 30 + Math.random() * 30, color });
-  }
-
-  draw();
-}
-
 function updateRobotSpeed(value) {
   // Convert slider value (1-20) to robot speed (0.001-0.02)
   robotSpeed = (value / 1000) * 4; // Range from 0.004 to 0.08
 }
+
+// Handle window resize to redraw canvas with proper scaling
+window.addEventListener('resize', function() {
+  draw();
+});
+
+// Initial draw call
+draw();
